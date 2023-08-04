@@ -5,14 +5,17 @@ import asyncio
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 from datetime import datetime
+from threading import Thread
+
 
 class Bot:
-    def __init__(self, token, chat_id):
+    def __init__(self, token, chat_id, polling_tasks_thread):
         self.application = ApplicationBuilder().token(token).build()
         self.chat_id = chat_id
         self.fetching = False
         self.posting = False
         self.polling = True
+        self.polling_tasks_thread = polling_tasks_thread
 
     async def _run_scrap(self):
         self.fetching = True
@@ -26,7 +29,8 @@ class Bot:
         with open('./check.txt', 'r') as check_file:
             check = check_file.read().strip().split('\n')
 
-        json_files = [file for file in os.listdir('./archive/') if file not in check]
+        json_files = [file for file in os.listdir(
+            './archive/') if file not in check]
 
         for file_name in json_files:
             with open(os.path.join('./archive/', file_name), 'r') as json_file:
@@ -39,7 +43,8 @@ class Bot:
                         else:
                             await self.application.bot.send_photo(chat_id="@our_kek_memes", photo=data[entry])
                     except Exception as e:
-                        print(f"{e} {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
+                        print(
+                            f"{e} {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
                 await self.application.bot.send_message(chat_id=self.chat_id, text=f"{file_name} done, working on next file")
                 check.append(file_name)
                 with open('./check.txt', 'w') as check_file:
@@ -48,12 +53,13 @@ class Bot:
         self.posting = False
 
     async def _polling_tasks(self):
-        while self.polling:
-            if not self.fetching:
-                await self._run_scrap()
-            if not self.posting:
-                await self._post()
-            await asyncio.sleep(3600) # Sleep for 1 hour
+        while True:
+            if self.polling:
+                if not self.fetching:
+                    await self._run_scrap()
+                if not self.posting:
+                    await self._post()
+            await asyncio.sleep(3600)
 
     async def startHandler(self, update: Update, _: ContextTypes.DEFAULT_TYPE, context: ContextTypes.DEFAULT_TYPE):
         if update.message.chat.id != self.chat_id:
@@ -67,7 +73,7 @@ class Bot:
             asyncio.create_task(self._post())
         else:
             await self.application.bot.send_message(chat_id=self.chat_id, text="Please wait for the previous posting task to finish")
-        
+
     async def fetchMemesHandler(self, update: Update, _: ContextTypes.DEFAULT_TYPE):
         if update.message.chat.id != self.chat_id:
             return
@@ -86,12 +92,20 @@ class Bot:
         if update.message.chat.id != self.chat_id:
             return
         self.polling = not self.polling
-        if self.polling:  # If polling was switched to True, start polling tasks
-            asyncio.create_task(self._polling_tasks())
+        if self.polling and (not hasattr(self, 'polling_tasks_thread') or not self.polling_tasks_thread.is_alive()):
+            self.polling_tasks_thread = Thread(target=self.start_polling_tasks)
+            self.polling_tasks_thread.start()
         await self.application.bot.send_message(chat_id=self.chat_id, text=f"Click! Current switch position is set to {self.polling}")
 
+
+
 if __name__ == '__main__':
-    bot = Bot('your-token', 'your-chat_id')
+    def start_polling_tasks():
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(bot._polling_tasks())
+
+    bot = Bot('your-token', 'your-chat_id', Thread(target=start_polling_tasks))
 
     handlers = [
         CommandHandler('start', bot.startHandler),
@@ -104,5 +118,5 @@ if __name__ == '__main__':
     for handler in handlers:
         bot.application.add_handler(handler)
 
-    asyncio.run(bot._polling_tasks())
+    bot.polling_tasks_thread.start()
     bot.application.run_polling()
