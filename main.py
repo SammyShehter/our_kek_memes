@@ -52,7 +52,7 @@ class Bot:
         await self.application.bot.send_message(chat_id=self.chat_id, text="Done with posting... Back to idle mode")
         self.posting = False
 
-    async def _polling_tasks(self):
+    async def polling_tasks(self):
         while True:
             if self.polling:
                 if not self.fetching:
@@ -93,7 +93,7 @@ class Bot:
             return
         self.polling = not self.polling
         if self.polling and (not hasattr(self, 'polling_tasks_thread') or not self.polling_tasks_thread.is_alive()):
-            self.polling_tasks_thread = Thread(target=self.start_polling_tasks)
+            self.polling_tasks_thread = Thread(target=start_polling_tasks)
             self.polling_tasks_thread.start()
         await self.application.bot.send_message(chat_id=self.chat_id, text=f"Click! Current switch position is set to {self.polling}")
 
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     def start_polling_tasks():
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        loop.run_until_complete(bot._polling_tasks())
+        loop.run_until_complete(bot.polling_tasks())
 
     bot = Bot('your-token', 'your-chat_id', Thread(target=start_polling_tasks))
 
