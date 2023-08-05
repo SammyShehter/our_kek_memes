@@ -21,7 +21,7 @@ class Bot:
         self.fetching = True
         process = await asyncio.create_subprocess_shell('python3 scrap.py')
         await process.wait()
-        await self.application.bot.send_message(chat_id=self.chat_id, text=f"Done fetching... {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
+        # await self.application.bot.send_message(chat_id=self.chat_id, text=f"Done fetching... {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
         self.fetching = False
 
     async def _post(self):
@@ -45,11 +45,11 @@ class Bot:
                     except Exception as e:
                         print(
                             f"{e} {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
-                await self.application.bot.send_message(chat_id=self.chat_id, text=f"{file_name} done, working on next file")
+                # await self.application.bot.send_message(chat_id=self.chat_id, text=f"{file_name} done, working on next file")
                 check.append(file_name)
                 with open('./check.txt', 'w') as check_file:
                     check_file.write('\n'.join(check))
-        await self.application.bot.send_message(chat_id=self.chat_id, text="Done with posting... Back to idle mode")
+        # await self.application.bot.send_message(chat_id=self.chat_id, text="Done with posting... Back to idle mode")
         self.posting = False
 
     async def polling_tasks(self):
@@ -79,7 +79,7 @@ class Bot:
             return
         if not self.fetching:
             asyncio.create_task(self._run_scrap())
-            await self.application.bot.send_message(chat_id=self.chat_id, text=f"Start fetching... {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
+            # await self.application.bot.send_message(chat_id=self.chat_id, text=f"Start fetching... {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
         else:
             await self.application.bot.send_message(chat_id=self.chat_id, text="Please wait for the previous fetching task to finish")
 
