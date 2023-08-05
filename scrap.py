@@ -58,11 +58,10 @@ for channel in channels:
                     'div', class_="tgme_widget_message_error")
                 if post_not_found and post_not_found.text == "Post not found":
                     if times_moved_to_next_post == 0:
-                        last_post -= 6
+                        last_post -= 7
                         raw_data[channel] = last_post
                         working = False
                     times_moved_to_next_post -= 1
-                last_post += 1
             else:
                 times_moved_to_next_post = 6
                 style = cssutils.parseStyle(post['style'])
