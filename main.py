@@ -3,7 +3,7 @@ import json
 import random
 import asyncio
 from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 from datetime import datetime
 from threading import Thread
 
@@ -12,6 +12,9 @@ class Bot:
     def __init__(self, token, chat_id, polling_tasks_thread):
         self.application = ApplicationBuilder().token(token).build()
         self.chat_id = chat_id
+        self.CHANNEL_ID = '@our_kek_memes'
+        self.CHECK_INTERVAL = 60
+        self.last_member_count = 0
         self.fetching = False
         self.posting = False
         self.polling = True
@@ -39,9 +42,9 @@ class Bot:
                     await asyncio.sleep(random.randint(10, 45))
                     try:
                         if '.mp4?token' in data[entry]:
-                            await self.application.bot.send_video(chat_id="@our_kek_memes", video=data[entry])
+                            await self.application.bot.send_video(chat_id=self.CHANNEL_ID, video=data[entry])
                         else:
-                            await self.application.bot.send_photo(chat_id="@our_kek_memes", photo=data[entry])
+                            await self.application.bot.send_photo(chat_id=self.CHANNEL_ID, photo=data[entry])
                     except Exception as e:
                         print(
                             f"{e} {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
@@ -97,6 +100,35 @@ class Bot:
             self.polling_tasks_thread.start()
         await self.application.bot.send_message(chat_id=self.chat_id, text=f"Click! Current switch position is set to {self.polling}")
 
+    async def log(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+        if update.message.chat.id == -1001615864926:
+            user_id = update.message.from_user.id
+            user_name = update.message.from_user.username or ''
+            first_name = update.message.from_user.first_name or ''
+
+            text = update.message.text
+            log = f"{('Username: ' + user_name + ' ') if user_name else ''}" \
+            f"{('FirstName: ' + first_name + ' ') if first_name else ''}" \
+            f"UserID: {user_id}: {text}\n"
+            with open("user_logs.txt", "a") as f:
+                    f.write(log)
+
+            answerProbability = random.randint(1, 20)
+            if answerProbability > 18:
+                await update.message.reply_text("Действительно")
+    # async def check_new_subscribers(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    #     try:
+    #         current_member_count = await self.application.bot.getChatMemberCount(self.CHANNEL_ID)
+
+    #         if current_member_count > self.last_member_count:
+    #             new_subscribers = current_member_count - self.last_member_count
+    #             print(f"{new_subscribers} new subscribers!")
+    #         elif current_member_count < self.last_member_count:
+    #             print("Some subscribers left the channel.")
+    #         self.last_member_count = current_member_count
+    #         await self.application.bot.send_message(chat_id=self.chat_id, text=self.last_member_count)
+    #     except Exception as e:
+    #         print(f"An error occurred: {e}")
 
 
 if __name__ == '__main__':
@@ -113,6 +145,7 @@ if __name__ == '__main__':
         CommandHandler('fetch', bot.fetchMemesHandler),
         CommandHandler('check', bot.healthCheckHandler),
         CommandHandler('click', bot.switchHandler),
+        MessageHandler(filters.TEXT & ~filters.COMMAND, bot.log),
     ]
 
     for handler in handlers:
