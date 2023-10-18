@@ -25,7 +25,7 @@ def get_video_hash(url, save_folder=None):
     hex_dig = hash_object.hexdigest()
 
     video_content = b"".join(video_chunks)
-    save_content_to_file("videos", hex_dig, f"{video_content}.mp4")
+    save_content_to_file("videos", f"{hex_dig}.mp4", video_content)
 
     return hex_dig
 
@@ -37,6 +37,6 @@ def get_image_hash(url):
     hash_object = hashlib.sha256(image_content)
     hex_dig = hash_object.hexdigest()
 
-    save_content_to_file("images", hex_dig, f"{image_content}.jpg")
+    save_content_to_file("images", f"{hex_dig}.jpg", image_content)
 
     return hex_dig
