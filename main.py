@@ -42,9 +42,9 @@ class Bot:
                     await asyncio.sleep(random.randint(10, 45))
                     try:
                         if '.mp4?token' in data[entry]:
-                            await self.application.bot.send_video(chat_id=self.CHANNEL_ID, video=data[entry])
+                            await self.application.bot.send_video(chat_id=self.CHANNEL_ID, video=data[entry]['src'])
                         else:
-                            await self.application.bot.send_photo(chat_id=self.CHANNEL_ID, photo=data[entry])
+                            await self.application.bot.send_photo(chat_id=self.CHANNEL_ID, photo=data[entry]['src'])
                     except Exception as e:
                         print(
                             f"{e} {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
