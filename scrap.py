@@ -28,6 +28,7 @@ for channel in channels:
     working = True
     last_post = raw_data[channel]
     times_moved_to_next_post = 6
+    current_run_duplicates = {}
 
     while working:
         time.sleep(10)
@@ -49,6 +50,9 @@ for channel in channels:
                 if post_is_video:
                     times_moved_to_next_post = 6
                     video_src = post_is_video.get('src')
+                    if video_src in current_run_duplicates:
+                        continue
+                    current_run_duplicates[video_hash] = True
                     check_url_dup = os.system(
                         f"grep -r -l {video_src} ./archive/")
                     if check_url_dup == 0:
@@ -72,6 +76,9 @@ for channel in channels:
                 times_moved_to_next_post = 6
                 style = cssutils.parseStyle(post['style'])
                 url = style['background-image'].strip('url()')
+                if url in current_run_duplicates:
+                    continue
+                current_run_duplicates[url] = True
                 check_url_dup = os.system(f"grep -r -l {url} ./archive/")
                 if check_url_dup == 0:
                     continue
