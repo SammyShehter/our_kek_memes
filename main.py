@@ -113,9 +113,9 @@ class Bot:
             with open("user_logs.txt", "a") as f:
                     f.write(log)
 
-            answerProbability = random.randint(1, 20)
-            if answerProbability > 18:
-                await update.message.reply_text("Действительно")
+    #       answerProbability = random.randint(1, 20)
+    #       if answerProbability > 17:
+    #            await update.message.reply_text("Действительно")
     # async def check_new_subscribers(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     #     try:
     #         current_member_count = await self.application.bot.getChatMemberCount(self.CHANNEL_ID)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
         asyncio.set_event_loop(loop)
         loop.run_until_complete(bot.polling_tasks())
 
-    bot = Bot('your-token', 'your-chat_id', Thread(target=start_polling_tasks))
+    bot = Bot(os.environ.get("MEMES_BOT"), os.environ.get("CHAT_ID"), Thread(target=start_polling_tasks))
 
     handlers = [
         CommandHandler('start', bot.startHandler),

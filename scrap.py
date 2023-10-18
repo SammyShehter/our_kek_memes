@@ -5,6 +5,7 @@ import cssutils
 from datetime import datetime
 from bs4 import BeautifulSoup
 import requests
+from utils import get_video_hash, get_image_hash
 
 
 def write_to_json(filepath, json_data):
@@ -48,11 +49,16 @@ for channel in channels:
                 if post_is_video:
                     times_moved_to_next_post = 6
                     video_src = post_is_video.get('src')
-                    exit_status = os.system(
-                        f"grep -r -l '{video_src}' ./archive/*.json")
-                    if exit_status == 0:
+                    check_url_dup = os.system(
+                        f"grep -r -l {video_src} ./archive/")
+                    if check_url_dup == 0:
                         continue
-                    memes_dictionary[f'{channel}_{last_post}'] = video_src + '\n'
+                    video_hash = get_video_hash(video_src)
+                    check_content_dup = os.system(
+                        f"grep -r -l {video_hash} ./archive/")
+                    if check_content_dup == 0:
+                        continue
+                    memes_dictionary[f'{channel}_{last_post}'] = {'hash': video_hash, 'src': video_src}
                     continue
                 post_not_found = soup.find(
                     'div', class_="tgme_widget_message_error")
@@ -66,10 +72,14 @@ for channel in channels:
                 times_moved_to_next_post = 6
                 style = cssutils.parseStyle(post['style'])
                 url = style['background-image'].strip('url()')
-                exit_status = os.system(f"grep -r -l '{url}' ./archive/*.json")
-                if exit_status == 0:
+                check_url_dup = os.system(f"grep -r -l {url} ./archive/")
+                if check_url_dup == 0:
                     continue
-                memes_dictionary[f'{channel}_{last_post}'] = url + '\n'
+                image_hash = get_image_hash(url)
+                check_content_dup = os.system(f"grep -r -l {image_hash} ./archive/")
+                if check_content_dup == 0:
+                    continue
+                memes_dictionary[f'{channel}_{last_post}'] = {'hash': image_hash, 'src': url}
         except Exception as e:
             print(f"An error occurred: {e}")
             raw_data[channel] = last_post
