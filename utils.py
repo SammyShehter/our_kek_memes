@@ -11,7 +11,7 @@ def save_content_to_file(folder, filename, content):
         f.write(content)
 
 
-def get_video_hash(url, save_folder=None):
+def get_video_hash(url):
     response = requests.get(url, stream=True)
 
     hash_object = hashlib.sha256()
@@ -40,3 +40,15 @@ def get_image_hash(url):
     save_content_to_file("images", f"{hex_dig}.jpg", image_content)
 
     return hex_dig
+
+
+def sendMessage(message):
+    try:
+        data = {
+            "service": "Our Memes",
+            "message": message
+        }
+        requests.post("http://localhost:8887",
+                      headers={'Content-Type': 'application/json'}, json=data)
+    except Exception as e:
+        print(f"An error occurred at main.sendMessage: {e}")

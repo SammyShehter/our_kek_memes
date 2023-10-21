@@ -5,7 +5,7 @@ import cssutils
 from datetime import datetime
 from bs4 import BeautifulSoup
 import requests
-from utils import get_video_hash, get_image_hash
+from utils import get_video_hash, get_image_hash, sendMessage
 
 
 def write_to_json(filepath, json_data):
@@ -31,7 +31,7 @@ for channel in channels:
     current_run_duplicates = {}
 
     while working:
-        time.sleep(10)
+        time.sleep(3)
         try:
             html_text = requests.get(
                 f"{base_url}{channel}/{last_post}?embed=1&mode=tme").text
@@ -52,12 +52,15 @@ for channel in channels:
                     video_src = post_is_video.get('src')
                     if video_src in current_run_duplicates:
                         continue
-                    current_run_duplicates[video_hash] = True
+                    current_run_duplicates[video_src] = True
                     check_url_dup = os.system(
                         f"grep -r -l {video_src} ./archive/")
                     if check_url_dup == 0:
                         continue
                     video_hash = get_video_hash(video_src)
+                    if video_hash in current_run_duplicates:
+                        continue
+                    current_run_duplicates[video_hash] = True
                     check_content_dup = os.system(
                         f"grep -r -l {video_hash} ./archive/")
                     if check_content_dup == 0:
@@ -83,12 +86,15 @@ for channel in channels:
                 if check_url_dup == 0:
                     continue
                 image_hash = get_image_hash(url)
+                if image_hash in current_run_duplicates:
+                    continue
+                current_run_duplicates[image_hash] = True
                 check_content_dup = os.system(f"grep -r -l {image_hash} ./archive/")
                 if check_content_dup == 0:
                     continue
                 memes_dictionary[f'{channel}_{last_post}'] = {'hash': image_hash, 'src': url}
         except Exception as e:
-            print(f"An error occurred: {e}")
+            sendMessage(f"An error occurred at scrap: {e}")
             raw_data[channel] = last_post
             working = False
 write_to_json('./list.json', raw_data)
