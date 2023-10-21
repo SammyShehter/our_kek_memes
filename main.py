@@ -75,7 +75,7 @@ class Bot:
         while True:
             if self.polling:
                 if not self.fetching:
-                    await self._run_scrap()
+                    await self._run_scrap("BOT")
                 if not self.posting:
                     await self._post()
             await asyncio.sleep(3600)
