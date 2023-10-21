@@ -9,7 +9,8 @@ from threading import Thread
 
 
 class Bot:
-    def __init__(self, token, chat_id, polling_tasks_thread):
+    # def __init__(self, token, chat_id, polling_tasks_thread):
+    def __init__(self, token, chat_id):
         self.application = ApplicationBuilder().token(token).build()
         self.chat_id = chat_id
         self.CHANNEL_ID = '@our_kek_memes'
@@ -18,7 +19,7 @@ class Bot:
         self.fetching = False
         self.posting = False
         self.polling = True
-        self.polling_tasks_thread = polling_tasks_thread
+        # self.polling_tasks_thread = polling_tasks_thread
 
     async def _run_scrap(self):
         self.fetching = True
@@ -55,14 +56,14 @@ class Bot:
         # await self.application.bot.send_message(chat_id=self.chat_id, text="Done with posting... Back to idle mode")
         self.posting = False
 
-    async def polling_tasks(self):
-        while True:
-            if self.polling:
-                if not self.fetching:
-                    await self._run_scrap()
-                if not self.posting:
-                    await self._post()
-            await asyncio.sleep(3600)
+    # async def polling_tasks(self):
+    #     while True:
+    #         if self.polling:
+    #             if not self.fetching:
+    #                 await self._run_scrap()
+    #             if not self.posting:
+    #                 await self._post()
+    #         await asyncio.sleep(3600)
 
     async def startHandler(self, update: Update, _: ContextTypes.DEFAULT_TYPE, context: ContextTypes.DEFAULT_TYPE):
         if update.message.chat.id != self.chat_id:
@@ -91,14 +92,14 @@ class Bot:
             return
         await self.application.bot.send_message(chat_id=self.chat_id, text=f"Healthy {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
 
-    async def switchHandler(self, update: Update, _: ContextTypes.DEFAULT_TYPE):
-        if update.message.chat.id != self.chat_id:
-            return
-        self.polling = not self.polling
-        if self.polling and (not hasattr(self, 'polling_tasks_thread') or not self.polling_tasks_thread.is_alive()):
-            self.polling_tasks_thread = Thread(target=start_polling_tasks)
-            self.polling_tasks_thread.start()
-        await self.application.bot.send_message(chat_id=self.chat_id, text=f"Click! Current switch position is set to {self.polling}")
+    # async def switchHandler(self, update: Update, _: ContextTypes.DEFAULT_TYPE):
+    #     if update.message.chat.id != self.chat_id:
+    #         return
+    #     self.polling = not self.polling
+    #     if self.polling and (not hasattr(self, 'polling_tasks_thread') or not self.polling_tasks_thread.is_alive()):
+    #         self.polling_tasks_thread = Thread(target=start_polling_tasks)
+    #         self.polling_tasks_thread.start()
+    #     await self.application.bot.send_message(chat_id=self.chat_id, text=f"Click! Current switch position is set to {self.polling}")
 
     async def log(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         if update.message.chat.id == -1001615864926:
@@ -132,24 +133,25 @@ class Bot:
 
 
 if __name__ == '__main__':
-    def start_polling_tasks():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(bot.polling_tasks())
+    # def start_polling_tasks():
+    #     loop = asyncio.new_event_loop()
+    #     asyncio.set_event_loop(loop)
+    #     loop.run_until_complete(bot.polling_tasks())
 
-    bot = Bot(os.environ.get("MEMES_BOT"), os.environ.get("CHAT_ID"), Thread(target=start_polling_tasks))
+    # bot = Bot(os.environ.get("MEMES_BOT"), os.environ.get("CHAT_ID"), Thread(target=start_polling_tasks))
+    bot = Bot(os.environ.get("MEMES_BOT"), os.environ.get("CHAT_ID"))
 
     handlers = [
         CommandHandler('start', bot.startHandler),
         CommandHandler('post', bot.postHandler),
         CommandHandler('fetch', bot.fetchMemesHandler),
         CommandHandler('check', bot.healthCheckHandler),
-        CommandHandler('click', bot.switchHandler),
+        # CommandHandler('click', bot.switchHandler),
         MessageHandler(filters.TEXT & ~filters.COMMAND, bot.log),
     ]
 
     for handler in handlers:
         bot.application.add_handler(handler)
 
-    bot.polling_tasks_thread.start()
+    # bot.polling_tasks_thread.start()
     bot.application.run_polling()
