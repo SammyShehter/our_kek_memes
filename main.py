@@ -39,8 +39,9 @@ class Bot:
         self.fetching = True
         process = await asyncio.create_subprocess_shell('python3 scrap.py')
         await process.wait()
-        for id, _ in self.chat_ids.items():
-            await self.application.bot.send_message(chat_id=id, text=f"Done fetching started by {sender}... {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
+        if sender != "BOT":
+            for id, _ in self.chat_ids.items():
+                await self.application.bot.send_message(chat_id=id, text=f"Done fetching started by {sender}... {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
         self.fetching = False
 
     async def _post(self, sender):
@@ -57,7 +58,7 @@ class Bot:
                 for entry in data:
                     await asyncio.sleep(random.randint(10, 45))
                     try:
-                        if '.mp4?token' in data[entry]:
+                        if '.mp4?token' in data[entry]['src']:
                             await self.application.bot.send_video(chat_id=self.CHANNEL_ID, video=data[entry]['src'])
                         else:
                             await self.application.bot.send_photo(chat_id=self.CHANNEL_ID, photo=data[entry]['src'])
@@ -67,8 +68,9 @@ class Bot:
                 check.append(file_name)
                 with open('./check.txt', 'w') as check_file:
                     check_file.write('\n'.join(check))
-        for id, _ in self.chat_ids.items():
-            await self.application.bot.send_message(chat_id=id, text=f"Done with posting by {sender}... Back to idle mode")
+        if sender != "BOT":
+            for id, _ in self.chat_ids.items():
+                await self.application.bot.send_message(chat_id=id, text=f"Done with posting by {sender}... Back to idle mode")
         self.posting = False
 
     async def polling_tasks(self):
@@ -77,7 +79,7 @@ class Bot:
                 if not self.fetching:
                     await self._run_scrap("BOT")
                 if not self.posting:
-                    await self._post()
+                    await self._post("BOT")
             await asyncio.sleep(3600)
 
     async def startHandler(self, update: Update, _: ContextTypes.DEFAULT_TYPE, context: ContextTypes.DEFAULT_TYPE):
