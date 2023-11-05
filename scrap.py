@@ -23,15 +23,15 @@ channels = list(raw_data.keys())
 base_url = "https://t.me/"
 memes_dictionary = {}
 current_datetime = datetime.now().strftime('%d.%m.%Y_%H:%M')
+current_run_duplicates = {}
 
 for channel in channels:
     working = True
     last_post = raw_data[channel]
     times_moved_to_next_post = 6
-    current_run_duplicates = {}
 
     while working:
-        time.sleep(3)
+        time.sleep(10)
         try:
             html_text = requests.get(
                 f"{base_url}{channel}/{last_post}?embed=1&mode=tme").text

@@ -48,7 +48,7 @@ def sendMessage(message):
             "service": "Our Memes",
             "message": message
         }
-        requests.post("http://localhost:8887",
+        requests.post(os.getenv("KEK_ALERT"),
                       headers={'Content-Type': 'application/json'}, json=data)
     except Exception as e:
         print(f"An error occurred at main.sendMessage: {e}")

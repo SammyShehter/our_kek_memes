@@ -2,6 +2,7 @@ import os
 import json
 import random
 import asyncio
+from dotenv import load_dotenv
 from utils import sendMessage
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
@@ -12,12 +13,12 @@ from threading import Thread
 class Bot:
     def __init__(self, token, chat_ids, polling_tasks_thread):
         self.application = ApplicationBuilder().token(token).build()
-        self.CHANNEL_ID = '@our_memes_post'
+        self.CHANNEL_ID = os.getenv("CHANNEL")
         self.CHECK_INTERVAL = 60
         self.last_member_count = 0
         self.fetching = False
         self.posting = False
-        self.polling = False
+        self.polling = True
         self.polling_tasks_thread = polling_tasks_thread
         self.chat_ids = {}
         try:
@@ -39,8 +40,9 @@ class Bot:
         self.fetching = True
         process = await asyncio.create_subprocess_shell('python3 scrap.py')
         await process.wait()
-        for id, _ in self.chat_ids.items():
-            await self.application.bot.send_message(chat_id=id, text=f"Done fetching started by {sender}... {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
+        if sender != "Bot":
+            for id, _ in self.chat_ids.items():
+                await self.application.bot.send_message(chat_id=id, text=f"Done fetching started by {sender}... {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
         self.fetching = False
 
     async def _post(self, sender):
@@ -57,27 +59,28 @@ class Bot:
                 for entry in data:
                     await asyncio.sleep(random.randint(10, 45))
                     try:
-                        if '.mp4?token' in data[entry]:
-                            await self.application.bot.send_video(chat_id=self.CHANNEL_ID, video=data[entry]['src'])
+                        if '.mp4?token' in data[entry]['src']:
+                            await self.application.bot.send_video(chat_id=self.CHANNEL_ID, video=data[entry]['src'], disable_notification=True)
                         else:
-                            await self.application.bot.send_photo(chat_id=self.CHANNEL_ID, photo=data[entry]['src'])
+                            await self.application.bot.send_photo(chat_id=self.CHANNEL_ID, photo=data[entry]['src'], disable_notification=True)
                     except Exception as e:
                         sendMessage(
                             f"main._post: {e} at {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
                 check.append(file_name)
                 with open('./check.txt', 'w') as check_file:
                     check_file.write('\n'.join(check))
-        for id, _ in self.chat_ids.items():
-            await self.application.bot.send_message(chat_id=id, text=f"Done with posting by {sender}... Back to idle mode")
+        if sender != "Bot":
+            for id, _ in self.chat_ids.items():
+                await self.application.bot.send_message(chat_id=id, text=f"Done with posting by {sender}... Back to idle mode")
         self.posting = False
 
     async def polling_tasks(self):
         while True:
             if self.polling:
                 if not self.fetching:
-                    await self._run_scrap()
+                    await self._run_scrap("Bot")
                 if not self.posting:
-                    await self._post()
+                    await self._post("Bot")
             await asyncio.sleep(3600)
 
     async def startHandler(self, update: Update, _: ContextTypes.DEFAULT_TYPE, context: ContextTypes.DEFAULT_TYPE):
@@ -137,7 +140,7 @@ if __name__ == '__main__':
         asyncio.set_event_loop(loop)
         loop.run_until_complete(bot.polling_tasks())
 
-    bot = Bot(os.environ.get("MEMES_BOT"), {os.environ.get("SAMMY"): "Sammy", os.environ.get(
+    bot = Bot(os.getenv("MEMES_BOT"), {os.getenv("SAMMY"): "Sammy", os.getenv(
         "MAKHNADA"): "Makhnada"}, Thread(target=start_polling_tasks))
 
     handlers = [
