@@ -9,12 +9,26 @@ from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, Messa
 from datetime import datetime
 from threading import Thread
 
-env = "dev" if os.getenv("ENV") == "dev" else "prod"
+load_dotenv()
+
+dev = True if os.getenv("ENV") == "dev" else False
+
+botToken = os.getenv(
+    "MEMES_BOT_DEV") if dev else os.getenv("MEMES_BOT")
+
+chat_ids = {os.getenv("SAMMY"): "Sammy",
+            os.getenv("MAKHNADA"): "Makhnada",
+            os.getenv("GARKAVAY"): "Garkavay"
+            }
+
+group_chat_id = os.getenv(
+    "MEME_CHAT_DEV") if dev else os.getenv("MEME_CHAT")
+
 
 class Bot:
     def __init__(self, token, chat_ids, polling_tasks_thread):
         self.application = ApplicationBuilder().token(token).build()
-        self.CHANNEL_ID = os.getenv("CHANNEL")
+        self.CHANNEL_ID = os.getenv("MEME_CHANNEL_DEV") if dev else os.getenv("MEME_CHANNEL")
         self.CHECK_INTERVAL = 60
         self.last_member_count = 0
         self.fetching = False
@@ -122,7 +136,8 @@ class Bot:
         await self.application.bot.send_message(chat_id=update.message.chat.id, text=f"Click! Current switch position is set to {self.polling}")
 
     async def log(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        if update.message.chat.id == -1001615864926:
+        print(update)
+        if update.message.chat.id == group_chat_id:
             user_id = update.message.from_user.id
             user_name = update.message.from_user.username or ''
             first_name = update.message.from_user.first_name or ''
@@ -141,16 +156,15 @@ if __name__ == '__main__':
         asyncio.set_event_loop(loop)
         loop.run_until_complete(bot.polling_tasks())
 
-    bot = Bot(os.getenv("MEMES_BOT"), {os.getenv("SAMMY"): "Sammy", os.getenv(
-        "MAKHNADA"): "Makhnada"}, Thread(target=start_polling_tasks))
+    bot = Bot(botToken, chat_ids, Thread(target=start_polling_tasks))
 
     handlers = [
+        MessageHandler(filters.TEXT & ~filters.COMMAND, bot.log),
         CommandHandler('start', bot.startHandler),
         CommandHandler('post', bot.postHandler),
         CommandHandler('fetch', bot.fetchMemesHandler),
         CommandHandler('check', bot.healthCheckHandler),
         CommandHandler('click', bot.switchHandler),
-        MessageHandler(filters.TEXT & ~filters.COMMAND, bot.log),
     ]
 
     for handler in handlers:

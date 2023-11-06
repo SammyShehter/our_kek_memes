@@ -31,7 +31,7 @@ for channel in channels:
     times_moved_to_next_post = 6
 
     while working:
-        time.sleep(10)
+        time.sleep(2)
         try:
             html_text = requests.get(
                 f"{base_url}{channel}/{last_post}?embed=1&mode=tme").text
