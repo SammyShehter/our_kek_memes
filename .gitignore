@@ -6,3 +6,5 @@ images
 __pycache__
 videos
 .env
+__pycache__
+venv
