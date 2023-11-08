@@ -3,7 +3,7 @@ import json
 import random
 import asyncio
 from dotenv import load_dotenv
-from utils import sendMessage
+from utils import sendMessage, get_answer
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler, filters
 from datetime import datetime
@@ -137,18 +137,28 @@ class Bot:
 
     async def log(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         print(update)
-        if update.message.chat.id == group_chat_id:
-            user_id = update.message.from_user.id
-            user_name = update.message.from_user.username or ''
-            first_name = update.message.from_user.first_name or ''
+        # if update.message.chat.id == group_chat_id:
+        user_id = update.message.from_user.id
+        user_name = update.message.from_user.username or ''
+        first_name = update.message.from_user.first_name or ''
 
-            text = update.message.text
-            log = f"{('Username: ' + user_name + ' ') if user_name else ''}" \
-                f"{('FirstName: ' + first_name + ' ') if first_name else ''}" \
-                f"UserID: {user_id}: {text}\n"
-            with open("user_logs.txt", "a") as f:
-                f.write(log)
+        text = update.message.text
+        user = f"{('Username: ' + user_name + ' ') if user_name else ''}" \
+            f"{('FirstName: ' + first_name + ' ') if first_name else ''}" \
+            f"UserID: {user_id}"
+        with open("user_logs.txt", "a") as f:
+            f.write(f"{user}: {text}\n")
+        words = text.split()
+        number_of_words = len(words)
+        gpt_response = 'ok'
 
+        if number_of_words < 2:
+            return
+        gpt_response = get_answer(user, text)
+
+        if gpt_response.lower() != 'ok' and gpt_response.lower() != 'ок' and gpt_response.lower() != 'ок.' and gpt_response.lower() != 'ok.':
+            # await asyncio.sleep(random.randint(10, 45))
+            await update.message.reply_text(text = gpt_response, reply_to_message_id = update.message.message_id)
 
 if __name__ == '__main__':
     def start_polling_tasks():
