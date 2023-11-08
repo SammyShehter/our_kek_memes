@@ -113,16 +113,19 @@ class Bot:
             await self.application.bot.send_message(chat_id=update.message.chat.id, text="Please wait for the previous posting task to finish")
 
     async def fetchMemesHandler(self, update: Update, _: ContextTypes.DEFAULT_TYPE):
-        if update.message.chat.id not in self.chat_ids:
-            return
-        if not self.fetching:
-            name = self.chat_ids[update.message.chat.id]
-            asyncio.create_task(self._run_scrap(
-                self.chat_ids[update.message.chat.id]))
-            for id, _ in self.chat_ids.items():
-                await self.application.bot.send_message(chat_id=id, text=f"Start fetching by {name}... {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
-        else:
-            await self.application.bot.send_message(chat_id=update.message.chat.id, text="Please wait for the previous fetching task to finish")
+        try:
+            if update.message.chat.id not in self.chat_ids:
+                return
+            if not self.fetching:
+                name = self.chat_ids[update.message.chat.id]
+                asyncio.create_task(self._run_scrap(
+                    self.chat_ids[update.message.chat.id]))
+                for id, _ in self.chat_ids.items():
+                    await self.application.bot.send_message(chat_id=id, text=f"Start fetching by {name}... {datetime.now().strftime('%d.%m.%Y at %H:%M')}")
+            else:
+                await self.application.bot.send_message(chat_id=update.message.chat.id, text="Please wait for the previous fetching task to finish")
+        except Exception as e:
+            sendMessage(f"Error in fetchMemesHandler: {e}")
 
     async def healthCheckHandler(self, update: Update, _: ContextTypes.DEFAULT_TYPE):
         if update.message.chat.id not in self.chat_ids:
@@ -136,29 +139,32 @@ class Bot:
         await self.application.bot.send_message(chat_id=update.message.chat.id, text=f"Click! Current switch position is set to {self.polling}")
 
     async def log(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        print(update)
-        # if update.message.chat.id == group_chat_id:
-        user_id = update.message.from_user.id
-        user_name = update.message.from_user.username or ''
-        first_name = update.message.from_user.first_name or ''
+        try:
+            print(update)
+            # if update.message.chat.id == group_chat_id:
+            user_id = update.message.from_user.id
+            user_name = update.message.from_user.username or ''
+            first_name = update.message.from_user.first_name or ''
 
-        text = update.message.text
-        user = f"{('Username: ' + user_name + ' ') if user_name else ''}" \
-            f"{('FirstName: ' + first_name + ' ') if first_name else ''}" \
-            f"UserID: {user_id}"
-        with open("user_logs.txt", "a") as f:
-            f.write(f"{user}: {text}\n")
-        words = text.split()
-        number_of_words = len(words)
-        gpt_response = 'ok'
+            text = update.message.text
+            user = f"{('Username: ' + user_name + ' ') if user_name else ''}" \
+                f"{('FirstName: ' + first_name + ' ') if first_name else ''}" \
+                f"UserID: {user_id}"
+            with open("user_logs.txt", "a") as f:
+                f.write(f"{user}: {text}\n")
+            words = text.split()
+            number_of_words = len(words)
+            gpt_response = 'ok'
 
-        if number_of_words < 2:
-            return
-        gpt_response = get_answer(user, text)
+            if number_of_words < 2:
+                return
+            gpt_response = get_answer(user, text)
 
-        if gpt_response.lower() != 'ok' and gpt_response.lower() != 'ок' and gpt_response.lower() != 'ок.' and gpt_response.lower() != 'ok.':
-            # await asyncio.sleep(random.randint(10, 45))
-            await update.message.reply_text(text = gpt_response, reply_to_message_id = update.message.message_id)
+            if gpt_response.lower() != 'ok' and gpt_response.lower() != 'ок' and gpt_response.lower() != 'ок.' and gpt_response.lower() != 'ok.':
+                # await asyncio.sleep(random.randint(10, 45))
+                await update.message.reply_text(text = gpt_response, reply_to_message_id = update.message.message_id)
+        except Exception as e:
+            sendMessage(f"Error in chat: {e}")
 
 if __name__ == '__main__':
     def start_polling_tasks():
