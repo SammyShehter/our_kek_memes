@@ -145,7 +145,7 @@ class Bot:
             user_id = update.message.from_user.id
             user_name = update.message.from_user.username or ''
             first_name = update.message.from_user.first_name or ''
-            message_thread_id = update.message.message_thread_id
+            message_thread_id = update.message.message_thread_id or 'main_thread'
             name_only = first_name if first_name else (user_name if user_name else "Васян")
 
             text = update.message.text
