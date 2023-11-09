@@ -43,7 +43,7 @@ const reply = {
     }, update_id: 280133211
 }
 
-fk = {
+const fk = {
     "Update": {
         "message": {
             "channel_chat_created": false,
@@ -125,63 +125,62 @@ fk = {
     }
 }
 
-fk2 = [
-    {
-        "Update": {
-            "message": {
+const fk2 = {
+    "Update": {
+        "message": {
+            "channel_chat_created": false,
+            "chat": {
+                "id": -1002029383516,
+                "title": "ODYSSEY CHAT",
+                "type": "SUPERGROUP"
+            },
+            "date": "2023-11-08T04:06:01Z",
+            "delete_chat_photo": false,
+            "from_user": {
+                "first_name": "Channel",
+                "id": 136817688,
+                "is_bot": true,
+                "username": "Channel_Bot"
+            },
+            "group_chat_created": false,
+            "message_id": 1221,
+            "message_thread_id": 48,
+            "reply_to_message": {
                 "channel_chat_created": false,
                 "chat": {
                     "id": -1002029383516,
                     "title": "ODYSSEY CHAT",
                     "type": "SUPERGROUP"
                 },
-                "date": "2023-11-08T04:06:01Z",
+                "date": "2023-11-08T03:56:08Z",
                 "delete_chat_photo": false,
                 "from_user": {
-                    "first_name": "Channel",
-                    "id": 136817688,
+                    "first_name": "@our_kek_memes_test",
+                    "id": 6873100479,
                     "is_bot": true,
-                    "username": "Channel_Bot"
+                    "username": "our_kek_memes_test_bot"
                 },
                 "group_chat_created": false,
-                "message_id": 1221,
+                "message_id": 1220,
                 "message_thread_id": 48,
-                "reply_to_message": {
-                    "channel_chat_created": false,
-                    "chat": {
-                        "id": -1002029383516,
-                        "title": "ODYSSEY CHAT",
-                        "type": "SUPERGROUP"
-                    },
-                    "date": "2023-11-08T03:56:08Z",
-                    "delete_chat_photo": false,
-                    "from_user": {
-                        "first_name": "@our_kek_memes_test",
-                        "id": 6873100479,
-                        "is_bot": true,
-                        "username": "our_kek_memes_test_bot"
-                    },
-                    "group_chat_created": false,
-                    "message_id": 1220,
-                    "message_thread_id": 48,
-                    "supergroup_chat_created": false,
-                    "text": "Ну, спасибо за добрые слова"
-                },
-                "sender_chat": {
-                    "id": -1001883103905,
-                    "title": "Our Memes",
-                    "type": "CHANNEL",
-                    "username": "our_kek_memes"
-                },
                 "supergroup_chat_created": false,
-                "text": "а будет еще Гослинг?"
+                "text": "Ну, спасибо за добрые слова"
             },
-            "update_id": 280133983
-        }
+            "sender_chat": {
+                "id": -1001883103905,
+                "title": "Our Memes",
+                "type": "CHANNEL",
+                "username": "our_kek_memes"
+            },
+            "supergroup_chat_created": false,
+            "text": "а будет еще Гослинг?"
+        },
+        "update_id": 280133983
     }
-]
+}
 
-fk3 = {
+
+const fk3 = {
     "Update": {
         "message": {
             "channel_chat_created": false,
@@ -235,8 +234,7 @@ fk3 = {
     }
 }
 
-
-fs = {
+const fs = {
     "Update": {
         "message": {
             "channel_chat_created": false,
@@ -325,7 +323,7 @@ fs = {
     }
 }
 
-fs2 = {
+const fs2 = {
     "Update": {
         "message": {
             "channel_chat_created": false,

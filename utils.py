@@ -57,12 +57,13 @@ def sendMessage(message):
         print(f"An error occurred at main.sendMessage: {e}")
 
 
-def get_answer(user: str, text: str):
+def get_answer(user: str, text: str, message_thread_id: int):
     try:
         payload = json.dumps({
             "id": user,
             "service_origin": "our_kek_memes",
-            "text": text
+            "text": text,
+            "message_thread_id": message_thread_id
         })
         headers = {
             'Content-Type': 'application/json'

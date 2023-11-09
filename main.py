@@ -145,23 +145,24 @@ class Bot:
             user_id = update.message.from_user.id
             user_name = update.message.from_user.username or ''
             first_name = update.message.from_user.first_name or ''
+            message_thread_id = update.message.message_thread_id
+            name_only = first_name if first_name else (user_name if user_name else "Васян")
 
             text = update.message.text
             user = f"{('Username: ' + user_name + ' ') if user_name else ''}" \
                 f"{('FirstName: ' + first_name + ' ') if first_name else ''}" \
                 f"UserID: {user_id}"
             with open("user_logs.txt", "a") as f:
-                f.write(f"{user}: {text}\n")
+                f.write(f"{user}.{message_thread_id}: {text}\n")
             words = text.split()
             number_of_words = len(words)
             gpt_response = 'ok'
 
             if number_of_words < 2:
                 return
-            gpt_response = get_answer(user, text)
+            gpt_response = get_answer(name_only, text, message_thread_id)
 
             if gpt_response.lower() != 'ok' and gpt_response.lower() != 'ок' and gpt_response.lower() != 'ок.' and gpt_response.lower() != 'ok.':
-                # await asyncio.sleep(random.randint(10, 45))
                 await update.message.reply_text(text = gpt_response, reply_to_message_id = update.message.message_id)
         except Exception as e:
             sendMessage(f"Error in chat: {e}")
